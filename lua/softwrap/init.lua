@@ -2,6 +2,7 @@ local M = {}
 local state = {
   float_win = nil,
   float_prev_win = nil,
+  float_buf = nil,
   dim_win = nil,
   float_cleanup_id = nil,
   split_win = nil,
@@ -21,6 +22,10 @@ function M.toggle_float(width)
   if state.float_win and vim.api.nvim_win_is_valid(state.float_win) then
     vim.api.nvim_win_close(state.float_win, true)
     state.float_win = nil
+    if state.float_buf and vim.api.nvim_buf_is_valid(state.float_buf) then
+      pcall(vim.keymap.del, "n", "<Esc>", { buffer = state.float_buf })
+    end
+    state.float_buf = nil
     if state.dim_win and vim.api.nvim_win_is_valid(state.dim_win) then
       vim.api.nvim_win_close(state.dim_win, true)
       state.dim_win = nil
@@ -44,6 +49,7 @@ function M.toggle_float(width)
   local row = 1
 
   state.float_prev_win = vim.api.nvim_get_current_win()
+  state.float_buf = buf
 
   local dim_buf = vim.api.nvim_create_buf(false, true)
   vim.bo[dim_buf].buftype = "nofile"
@@ -74,6 +80,10 @@ function M.toggle_float(width)
     zindex = 2,
   })
 
+  vim.keymap.set("n", "<Esc>", function()
+    M.toggle_float(width)
+  end, { buffer = buf, nowait = true, silent = true })
+
   state.float_cleanup_id = vim.api.nvim_create_autocmd("WinClosed", {
     once = true,
     callback = function()
@@ -81,6 +91,10 @@ function M.toggle_float(width)
         vim.api.nvim_win_close(state.dim_win, true)
       end
       state.float_win = nil
+      if state.float_buf and vim.api.nvim_buf_is_valid(state.float_buf) then
+        pcall(vim.keymap.del, "n", "<Esc>", { buffer = state.float_buf })
+      end
+      state.float_buf = nil
       state.dim_win = nil
       state.float_cleanup_id = nil
     end,
