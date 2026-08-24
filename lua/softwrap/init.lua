@@ -101,6 +101,13 @@ function M.toggle_float(width)
   })
 
   apply_wrap_opts(width)
+	vim.api.nvim_set_option_value("winhl", "Normal:SoftWrapDim", {
+		win = state.dim_win,
+	})
+
+	vim.api.nvim_set_option_value("winblend", 30, {
+		win = state.dim_win,
+	})
 end
 
 function M.toggle_split(width)
