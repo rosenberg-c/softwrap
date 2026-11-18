@@ -14,6 +14,9 @@ settings applied automatically.
 
 ## Installation
 
+Run `make install` to symlink this repository to `~/.config/softwrap`.
+The command fails rather than replacing an existing path at that location.
+
 Lazy.nvim:
 
 ```lua
